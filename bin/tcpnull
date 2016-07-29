@@ -1,0 +1,48 @@
+#!/usr/bin/env ruby
+require 'bundler/setup'
+require 'docopt'
+require 'tcp_null'
+
+doc = <<DOCOPT
+tcpnull.
+
+Usage:
+  #{__FILE__} --hostname=<host> --port=<port> [--verbose] [--echo] [--http]
+  #{__FILE__} -h | --help
+  #{__FILE__} --version
+
+Options:
+  -h --help           Show this screen.
+  --version           Show version.
+  --hostname=<host>   The hostname or IP address to listen on.
+  --port=<port>       Port number to listen on.
+  --verbose           Print data received from clients to STDOUT.
+  --echo              Send the data received back to the client.
+  --http              Send the data received back to the client as an HTTP 200 OK response (overrides echo).
+
+DOCOPT
+
+begin
+  args = Docopt::docopt(doc)
+rescue Docopt::Exit => e
+  puts e.message
+end
+
+server = TcpNull::Server.new echo: args['--echo'], http: args['--http'], verbose: args['--verbose']
+
+# Kill the server on CTRL-C
+trap 'SIGINT' do
+  puts '[*] Killing TcpNull server.'
+  server.stop
+  exit 0
+end
+
+puts '[*] Initializing TcpNull server.' + server.hostname
+puts '[*] Host: ' + server.hostname
+puts '[*] Port:    ' + server.port.to_s
+puts '[*] Verbose: ' + server.verbose.to_s
+puts '[*] HTTP:    ' + server.http.to_s
+puts '[*] Echo:    ' + server.echo.to_s
+puts '[*] Starting now. Press CTRL-C to kill the server.'
+
+server.start
