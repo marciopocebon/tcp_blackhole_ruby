@@ -62,10 +62,7 @@ class TcpNullTest < Minitest::Test
       test_client.write("Test Content\n123\n!@#\nTest")
       response = test_client.recv(65535)
       test_client.close
-      if response != "Test Content\n123\n!@#\nTest"
-        flunk 'Content does not match'
-        puts response
-      end
+      assert "Test Content\n123\n!@#\nTest", response
     rescue
       flunk 'Client error connecting to server.'
     end
@@ -102,10 +99,7 @@ class TcpNullTest < Minitest::Test
       response = test_client.recv(65535)
       test_client.close
 
-      if response != "HTTP/1.1 200 OK\nContent-Length: 13\n\nTest Content\n"
-        flunk 'Content does not match'
-        puts response
-      end
+      assert_equal "HTTP/1.1 200 OK\nContent-Length: 13\n\nTest Content\n", response
     rescue
       flunk 'Client error with server.'
     end

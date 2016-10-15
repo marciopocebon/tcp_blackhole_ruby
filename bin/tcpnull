@@ -1,34 +1,57 @@
 #!/usr/bin/env ruby
 require 'bundler/setup'
-require 'docopt'
 require 'tcp_null'
+require 'optparse'
 
-doc = <<DOCOPT
-tcpnull.
+options = {}
 
-Usage:
-  #{__FILE__} --hostname=<host> --port=<port> [--verbose] [--echo] [--http]
-  #{__FILE__} -h | --help
-  #{__FILE__} --version
+opt_parser = OptionParser.new do |opt|
+  opt.banner = "Usage: opt_parser COMMAND [OPTIONS]"
+  opt.separator  ""
+  opt.separator  "Commands"
+  opt.separator  "     start: start server"
+  opt.separator  "     stop: stop server"
+  opt.separator  "     restart: restart server"
+  opt.separator  ""
+  opt.separator  "Options"
 
-Options:
-  -h --help           Show this screen.
-  --version           Show version.
-  --hostname=<host>   The hostname or IP address to listen on.
-  --port=<port>       Port number to listen on.
-  --verbose           Print data received from clients to STDOUT.
-  --echo              Send the data received back to the client.
-  --http              Send the data received back to the client as an HTTP 200 OK response (overrides echo).
+  opt.on("-e","--echo","echo the data received back to the client") do |echo|
+    options[:echo] = true
+  end
 
-DOCOPT
+  opt.on("-v","--verbose","Output data received to STDOUT") do
+    options[:verbose] = true
+  end
 
-begin
-  args = Docopt::docopt(doc)
-rescue Docopt::Exit => e
-  puts e.message
+  opt.on("-h","--help","help") do
+
+    puts 'help text....'
+    puts options
+    puts 'end help text....'
+  end
 end
 
+opt_parser.parse!
+
+
+
+
+
+
+puts 'program running...options: '
+puts options
+
+
+
+
+
+
+exit(1)
+
+
+
 server = TcpNull::Server.new echo: args['--echo'], http: args['--http'], verbose: args['--verbose']
+
 
 # Kill the server on CTRL-C
 trap 'SIGINT' do
@@ -37,7 +60,7 @@ trap 'SIGINT' do
   exit 0
 end
 
-puts '[*] Initializing TcpNull server.' + server.hostname
+puts ('[*] Initializing TcpNull server.' + server.hostname).blue
 puts '[*] Host: ' + server.hostname
 puts '[*] Port:    ' + server.port.to_s
 puts '[*] Verbose: ' + server.verbose.to_s

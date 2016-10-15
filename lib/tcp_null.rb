@@ -21,6 +21,7 @@ module TcpNull
     end
 
     def vputs(str)
+      # Print to STDOUT only if verbose mode is true
       if @verbose
         puts str
       end
